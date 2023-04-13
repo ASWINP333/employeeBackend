@@ -14,6 +14,7 @@ exports.getEmployee = async (req,res)=>{
 //add employee  --admin
 exports.createEmployee = async(req,res) =>{
 
+  try {
     jwt.verify(req.body.token,"UserToken",(err,decoded)=>{
         if(decoded && decoded.email){
             let data = new Employee({
@@ -30,11 +31,18 @@ exports.createEmployee = async(req,res) =>{
             res.json({"status":"failed...unauthorized User...!"})
         }
     })
+  } catch (error) {
+    res.status(400).json({
+        success: false,
+        message : error.message
+    })
+  }
 
 };
 
 //update Employee --admin
 exports.updateEmployee = async(req,res)=>{
+   try {
     let employee = await Employee.findById(req.params.id);
 
     if(!employee){
@@ -53,6 +61,12 @@ exports.updateEmployee = async(req,res)=>{
         success: true,
         employee
     })
+   } catch (error) {
+    res.status(400).json({
+        success: false,
+        message : error.message
+    })
+   }
 }
 
 //Delete employee --Admin
