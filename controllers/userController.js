@@ -42,34 +42,39 @@ exports.getAllUsers= async(req,res)=>{
 //user login
 
 exports.loginUser = async (req,res) =>{
-    try {
-      const {email,password} = req.body
-      const userCredentials = await User.findOne({email:email})
-      if (userCredentials) {
-        const authenticated = bcrypt.compareSync(password,userCredentials.password)
-        if (authenticated) {
-          jwt.sign({email,id:userCredentials._id},"UserToken",{expiresIn:"1d"},(err,token)=>{
-            if (err) {
-              res.status(500).json({
-                status:false,
-                message:err.message
-              })
-            }
-            else{
-              res.status(200).json({
-                status:"success",
-               "data":userCredentials,
-                "token":token
-              })
-            }
-          })
-        }
+  try {
+    let email = req.body.email;
+    let password = req.body.password;
+    const userCredentials = await User.findOne({email:email})
+    if (userCredentials) {
+      const authenticated = bcrypt.compareSync(password,userCredentials.password)
+      if (authenticated) {
+        jwt.sign({email:email,id:userCredentials._id},"UserToken",{expiresIn:"1d"},(err,token)=>{
+          if (err) {
+            res.status(500).json({
+              "status":false,
+              message:err.message
+            })
+          }
+          else{
+            res.json({
+              "status":"success",
+             "data":userCredentials,
+              "token":token
+            })
+          }
+        })
       }
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message : error.message
-    })
+      else{
+        res.json({"status":"failed","data":"invalid password"})
     }
+    }else{
+      res.json({"status":"failed","data":"invalid email"})
   }
-
+  } catch (error) {
+    res.status(500).json({
+      "status":false,
+      message:error.message
+    })
+  }
+}
